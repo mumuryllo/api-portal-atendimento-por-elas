@@ -60,6 +60,10 @@ namespace portal_por_elas.Data.Migrations
                         .HasColumnType("character varying(50)")
                         .HasColumnName("role");
 
+                    b.Property<DateTime?>("TemporaryPasswordExpiryTime")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("temporary_password_expiry_time");
+
                     b.HasKey("Id");
 
                     b.HasIndex("Email")

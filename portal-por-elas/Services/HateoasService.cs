@@ -9,12 +9,6 @@ namespace portal_por_elas.Services
 {
     public class HateoasService : IHateoasService
     {
-        // Implementation required
-    }
-    {
-        // Implementation required
-    }
-    {
         private readonly EndpointDataSource _endpointDataSource;
         private readonly IWebHostEnvironment _environment;
         private readonly string _baseUrl;
@@ -26,7 +20,7 @@ namespace portal_por_elas.Services
         {
             _endpointDataSource = endpointDataSource;
             _environment = environment;
-            _baseUrl = baseUrl ?? configuration["ApiSettings:BaseUrl"]?.TrimEnd('/')
+            _baseUrl = configuration["ApiSettings:BaseUrl"]?.TrimEnd('/')
                 ?? (_environment.IsDevelopment()
                     ? "https://api.dev.portalporelas.com.br"
                     : "https://api.portalporelas.com.br");

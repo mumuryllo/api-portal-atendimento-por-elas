@@ -6,7 +6,7 @@ namespace portal_por_elas.Interfaces.Services
 {
     public interface IHateoasService
     {
-        HateoasResponseDto DiscoverLinks(ClaimsPrincipal user, string baseUrl, string? simulateRole = null);
+        HateoasResponseDto DiscoverLinks(ClaimsPrincipal user, string? simulateRole = null);
       
     }
 }

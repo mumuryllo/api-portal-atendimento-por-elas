@@ -22,6 +22,13 @@
         public bool Active { get; private set; }
         public string Role { get; private set; } = string.Empty;
         public DateTime CreatedAt { get; private set; }
+        public DateTime? TemporaryPasswordExpiryTime { get; private set; }
+
+        public void SetTemporaryPassword(string temporaryPasswordHash, DateTime expiryTime)
+        {
+            SetPassword(temporaryPasswordHash);
+            TemporaryPasswordExpiryTime = expiryTime;
+        }
 
         public void SetEmail(string email)
         {
@@ -66,6 +73,11 @@
         public void ChangePassword(string newPasswordHash)
         {
             SetPassword(newPasswordHash);
+            TemporaryPasswordExpiryTime = null;
+        }
+        public bool IsTemporaryPasswordExpired()
+        {
+            return TemporaryPasswordExpiryTime.HasValue && TemporaryPasswordExpiryTime.Value <= DateTime.UtcNow;
         }
 
         public void ChangeRole(string newRole)

@@ -42,6 +42,10 @@ namespace portal_por_elas.Data.Mappings
                 .HasColumnName(DataBaseConstants.Columns.Active)
                 .IsRequired();
 
+            builder.Property(u => u.TemporaryPasswordExpiryTime)
+                   .HasColumnName(DataBaseConstants.Columns.TemporaryPasswordExpiryTime)
+                   .IsRequired(false);
+
             builder.Property(x => x.CreatedAt)
                 .HasColumnName(DataBaseConstants.Columns.CreatedAt)
                 .IsRequired();

@@ -33,6 +33,12 @@ namespace portal_por_elas.Services
             if (!BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash))
                 throw new UnauthorizedException("Usuário ou senha inválidos.");
 
+            if (user is null || !user.Active)
+                throw new UnauthorizedException("Usuário ou senha inválidos.");
+
+            if (user.IsTemporaryPasswordExpired())
+                throw new UnauthorizedException("Sua senha temporária expirou. Solicite uma nova senha.");
+
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.UTF8.GetBytes(_jwtSettings.SecretKey);
 

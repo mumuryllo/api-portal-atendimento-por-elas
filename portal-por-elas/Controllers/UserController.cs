@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using portal_por_elas.Contracts.Request;
+using portal_por_elas.Contracts.Request.portal_por_elas.Contracts.Request;
 using portal_por_elas.Contracts.Response;
 using portal_por_elas.Interfaces.Services;
 
@@ -62,6 +63,19 @@ namespace portal_por_elas.Controllers
         public async Task<IActionResult> Delete([FromRoute] Guid id)
         {
             await _userService.DeleteAsync(id);
+            return NoContent();
+        }
+        /// <summary>
+        /// Gera uma nova senha temporária e envia para o e-mail cadastrado.
+        /// </summary>
+        [HttpPost("forgot-password")]
+        [AllowAnonymous]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequestDto dto)
+        {
+            await _userService.SendTemporaryPasswordAsync(dto);
             return NoContent();
         }
     }

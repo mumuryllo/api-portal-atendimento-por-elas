@@ -1,4 +1,5 @@
 ﻿using portal_por_elas.Contracts.Request;
+using portal_por_elas.Contracts.Request.portal_por_elas.Contracts.Request;
 using portal_por_elas.Contracts.Response;
 
 namespace portal_por_elas.Interfaces.Services
@@ -8,5 +9,6 @@ namespace portal_por_elas.Interfaces.Services
         Task<UserResponseDto> CreateAsync(CreateUserDto dto);
         Task DeleteAsync(Guid id);
         Task UpdatePasswordAsync(UpdatePasswordRequestDto dto);
+        Task SendTemporaryPasswordAsync(ForgotPasswordRequestDto dto);
     }
 }

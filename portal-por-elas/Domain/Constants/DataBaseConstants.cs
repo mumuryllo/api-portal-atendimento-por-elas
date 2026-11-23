@@ -18,6 +18,7 @@
             public const string Active = "active";
             public const string Role = "role";
             public const string CreatedAt = "created_at";
+            public const string TemporaryPasswordExpiryTime = "temporary_password_expiry_time";
         }
     }
 }

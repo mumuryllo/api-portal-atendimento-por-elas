@@ -1,0 +1,6 @@
+@portal_por_elas_HostAddress = http://localhost:5014
+
+GET {{portal_por_elas_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

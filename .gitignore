@@ -1,0 +1,48 @@
+---
+
+### 2. `.gitignore`
+
+Salve este arquivo na **raiz do repositório Git** (junto ao `.sln`). Ele ignora pastas de build (`bin/`, `obj/`), arquivos temporários do Visual Studio/VS Code e bloqueia arquivos com senhas e chaves locais (`appsettings.Development.json`, `appsettings.Production.json`, `.env`, `launchSettings.json`):
+
+```gitignore
+## .NET / Visual Studio
+bin/
+obj/
+out/
+.vs/
+.vscode/
+*.user
+*.userosscache
+*.sln.docstates
+*.suo
+*.cache
+*.dll
+*.exe
+*.pdb
+
+## Arquivos de Resultados de Testes e Coverage
+TestResults/
+coverage/
+*.trx
+*.coverage
+*.coveragexml
+
+## Dados Sensíveis e Configurações Locais (NUNCA versionar)
+appsettings.Development.json
+appsettings.Production.json
+appsettings.Local.json
+**/Properties/launchSettings.json
+.env
+.env.*
+secrets.json
+
+## Logs e Arquivos Temporários
+*.log
+logs/
+*.tmp
+*.temp
+
+## Sistema Operacional
+.DS_Store
+Thumbs.db
+desktop.ini

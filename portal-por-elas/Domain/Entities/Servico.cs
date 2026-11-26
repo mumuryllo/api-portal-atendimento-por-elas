@@ -6,6 +6,9 @@
 
         public Servico(Guid id, string nome)
         {
+            if (id == Guid.Empty)
+                throw new ArgumentException("Identificador do serviço é obrigatório.", nameof(id));
+
             Id = id;
             DefinirNome(nome);
             Ativo = true;

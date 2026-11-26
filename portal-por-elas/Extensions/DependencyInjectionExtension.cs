@@ -8,7 +8,6 @@ using portal_por_elas.Interfaces.Services;
 using portal_por_elas.Middlewares;
 using portal_por_elas.Security;
 using portal_por_elas.Services;
-using portal_por_elas.Services.portal_por_elas.Services;
 using portal_por_elas.Validators;
 using PortalOS.Data.Repositories;
 

@@ -6,6 +6,8 @@ using portal_por_elas.Middlewares;
 using portal_por_elas.Security;
 using System.Text;
 
+
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();

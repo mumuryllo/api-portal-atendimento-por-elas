@@ -8,6 +8,9 @@ namespace portal_por_elas.Domain.Entities
 
         public FilaAtendimento(Guid eventoId, string nomeMulher, IEnumerable<Guid> servicosIds)
         {
+            if (eventoId == Guid.Empty)
+                throw new ArgumentException("Identificador do evento é obrigatório.", nameof(eventoId));
+
             Id = Guid.NewGuid();
             EventoId = eventoId;
             DefinirNomeMulher(nomeMulher);

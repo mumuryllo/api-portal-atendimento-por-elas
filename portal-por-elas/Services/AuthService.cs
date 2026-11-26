@@ -7,8 +7,7 @@ using portal_por_elas.Interfaces.Services;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
-namespace portal_por_elas.Services
-{
+
     namespace portal_por_elas.Services
     {
         public class AuthService : IAuthService
@@ -97,4 +96,4 @@ namespace portal_por_elas.Services
             }
         }
     }
-}
+

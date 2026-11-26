@@ -6,6 +6,12 @@
 
         public FilaAtendimentoServico(Guid filaAtendimentoId, Guid servicoId)
         {
+            if (filaAtendimentoId == Guid.Empty)
+                throw new ArgumentException("Identificador do atendimento é obrigatório.", nameof(filaAtendimentoId));
+
+            if (servicoId == Guid.Empty)
+                throw new ArgumentException("Identificador do serviço é obrigatório.", nameof(servicoId));
+
             FilaAtendimentoId = filaAtendimentoId;
             ServicoId = servicoId;
         }

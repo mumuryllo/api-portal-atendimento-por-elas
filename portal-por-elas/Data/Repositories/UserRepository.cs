@@ -13,7 +13,6 @@ namespace PortalOS.Data.Repositories
         public async Task<User?> GetByEmailAsync(string email)
         {
             return await _context.Users
-                .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.Email == email);
         }
     }

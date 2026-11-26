@@ -194,6 +194,17 @@ namespace portal_por_elas.Services
             };
         }
 
+        public async Task<int> LimparAtendimentosFinalizadosExpiradosAsync()
+        {
+            var limiteUtc = DateTime.UtcNow.AddHours(-1);
+            var quantidadeRemovida = await _uow.FilaAtendimentos.RemoverFinalizadosExpiradosAsync(limiteUtc);
+
+            if (quantidadeRemovida > 0)
+                await _uow.CommitAsync();
+
+            return quantidadeRemovida;
+        }
+
         private static ItemFilaAtendimentoResponseDto MapearAtendimento(FilaAtendimento f) => new()
         {
             Id = f.Id,

@@ -40,5 +40,20 @@ namespace portal_por_elas.Data.Repositories
                 .AsNoTracking()
                 .ToListAsync();
         }
+
+        public async Task<int> RemoverFinalizadosExpiradosAsync(DateTime limiteUtc)
+        {
+            var expirados = await _dbSet
+                .Where(f => f.Status == StatusAtendimento.Finalizado
+                         && f.FinalizadoEm.HasValue
+                         && f.FinalizadoEm.Value <= limiteUtc)
+                .ToListAsync();
+
+            if (!expirados.Any())
+                return 0;
+
+            _dbSet.RemoveRange(expirados);
+            return expirados.Count;
+        }
     }
 }

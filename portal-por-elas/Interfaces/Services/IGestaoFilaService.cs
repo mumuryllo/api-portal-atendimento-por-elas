@@ -18,5 +18,6 @@ namespace portal_por_elas.Interfaces.Services
         Task<ItemFilaAtendimentoResponseDto> AtualizarStatusAsync(Guid atendimentoId, StatusAtendimento novoStatus);
         Task<IEnumerable<EventoComFilaResponseDto>> ObterFilaAdminPorEventosAsync();
         Task<PainelPublicoResponseDto> ObterPainelPublicoAsync(Guid? eventoId = null);
+        Task<int> LimparAtendimentosFinalizadosExpiradosAsync();
     }
 }

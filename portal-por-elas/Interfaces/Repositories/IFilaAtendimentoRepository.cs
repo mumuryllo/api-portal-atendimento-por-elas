@@ -7,5 +7,6 @@ namespace portal_por_elas.Interfaces.Repositories
         Task<FilaAtendimento?> ObterPorIdComServicosAsync(Guid id);
         Task<IEnumerable<FilaAtendimento>> ObterPainelPublicoPorEventoAsync(Guid eventoId);
         Task<IEnumerable<FilaAtendimento>> ObterTodoPainelPublicoAsync();
+        Task<int> RemoverFinalizadosExpiradosAsync(DateTime limiteUtc);
     }
 }

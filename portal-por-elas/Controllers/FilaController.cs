@@ -118,5 +118,23 @@ namespace portal_por_elas.Controllers
             var atualizado = await _gestaoFilaService.AtualizarStatusAsync(id, dto.Status);
             return Ok(atualizado);
         }
+
+        /// <summary>
+        /// Remove do banco de dados os atendimentos com status Finalizado há mais de 1 hora.
+        /// </summary>
+        [HttpDelete("finalizados/expirados")]
+        [Authorize(Roles = AuthorizationConstants.Admin)]
+        [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        public async Task<IActionResult> LimparFinalizadosExpirados()
+        {
+            var removidos = await _gestaoFilaService.LimparAtendimentosFinalizadosExpiradosAsync();
+            return Ok(new
+            {
+                removidos,
+                mensagem = $"{removidos} atendimento(s) finalizado(s) há mais de 1 hora foram removido(s)."
+            });
+        }
     }
 }

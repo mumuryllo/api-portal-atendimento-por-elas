@@ -8,6 +8,7 @@ using portal_por_elas.Interfaces.Services;
 using portal_por_elas.Middlewares;
 using portal_por_elas.Security;
 using portal_por_elas.Services;
+using portal_por_elas.Services.Background;
 using portal_por_elas.Validators;
 using PortalOS.Data.Repositories;
 
@@ -37,6 +38,7 @@ namespace portal_por_elas.Extensions
 
             services.AddSingleton<IFilaNotificacaoService, FilaNotificacaoService>();
             services.AddScoped<IGestaoFilaService, GestaoFilaService>();
+            services.AddHostedService<LimpezaFilaBackgroundService>();
 
             return services;
         }

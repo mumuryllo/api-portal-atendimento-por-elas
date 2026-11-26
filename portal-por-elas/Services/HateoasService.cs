@@ -14,16 +14,16 @@ namespace portal_por_elas.Services
         private readonly string _baseUrl;
 
         public HateoasService(
-            EndpointDataSource endpointDataSource,
-            IWebHostEnvironment environment,
-            IConfiguration configuration)
+       EndpointDataSource endpointDataSource,
+       IWebHostEnvironment environment,
+       IConfiguration configuration)
         {
             _endpointDataSource = endpointDataSource;
             _environment = environment;
             _baseUrl = configuration["ApiSettings:BaseUrl"]?.TrimEnd('/')
                 ?? (_environment.IsDevelopment()
-                    ? "https://api.dev.portalporelas.com.br"
-                    : "https://api.portalporelas.com.br");
+                    ? "https://portal-por-elas/dev"
+                    : "https://portal-por-elas/prod");
         }
 
         public HateoasResponseDto DiscoverLinks(
@@ -43,6 +43,7 @@ namespace portal_por_elas.Services
                 .SelectMany(endpoint => MapEndpointToLinks(endpoint, isAuthenticated, effectiveRole, isDev))
                 .ToList();
 
+            links.AddRange(GetInfrastructureLinks(effectiveRole));
             links.AddRange(isDev ? GetDevelopmentLinks() : GetProductionLinks());
 
             return new HateoasResponseDto
@@ -79,7 +80,8 @@ namespace portal_por_elas.Services
 
             var route = (endpoint.RoutePattern.RawText?.TrimStart('/') ?? string.Empty)
                 .Replace("[controller]", action.ControllerName.ToLowerInvariant())
-                .Replace("[action]", action.ActionName.ToLowerInvariant());
+                .Replace("[action]", action.ActionName.ToLowerInvariant())
+                .Replace(":guid", string.Empty, StringComparison.OrdinalIgnoreCase);
 
             var methods = endpoint.Metadata.GetMetadata<HttpMethodMetadata>()?.HttpMethods ?? new[] { "GET" };
 
@@ -95,6 +97,32 @@ namespace portal_por_elas.Services
                     RequiresAuth = requiresAuth,
                     AllowedRoles = allowedRoles.Any() ? allowedRoles : new List<string> { requiresAuth ? "Authenticated" : "Public" },
                     ControllerAction = isDev ? $"{action.ControllerName}Controller.{action.ActionName}" : null
+                };
+            }
+        }
+
+        private IEnumerable<HateoasLinkResponseDto> GetInfrastructureLinks(string currentRole)
+        {
+            yield return new HateoasLinkResponseDto
+            {
+                Rel = "gateway-health",
+                Href = $"{_baseUrl}/gateway/health",
+                Method = "GET",
+                RequiresAuth = false,
+                AllowedRoles = new List<string> { "Public" },
+                ControllerAction = "Gateway.HealthCheck"
+            };
+
+            if (currentRole.Equals("ADMIN", StringComparison.OrdinalIgnoreCase))
+            {
+                yield return new HateoasLinkResponseDto
+                {
+                    Rel = "fila-manutencao-limpar-expirados",
+                    Href = $"{_baseUrl}/api/fila/finalizados/expirados",
+                    Method = "DELETE",
+                    RequiresAuth = true,
+                    AllowedRoles = new List<string> { "ADMIN" },
+                    ControllerAction = "FilaController.LimparFinalizadosExpirados"
                 };
             }
         }

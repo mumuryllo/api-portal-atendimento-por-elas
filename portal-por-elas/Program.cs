@@ -13,6 +13,7 @@ builder.Services.AddControllers();
 builder.Services.AddDatabase(builder.Configuration);
 builder.Services.AddScopedDependencies();
 builder.Services.AddMappingDependencies();
+builder.Services.AddCustomRateLimiting();
 
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorDependencies();
@@ -65,10 +66,12 @@ else
 {
     app.UseHttpsRedirection();
 }
-
+app.UseHttpsRedirection();
+app.UseCors("...");
+app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapControllers();
+app.MapControllers().RequireRateLimiting(RateLimitingExtension.PoliticaGeral);
 
 app.Run();

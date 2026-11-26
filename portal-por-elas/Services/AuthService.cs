@@ -1,75 +1,100 @@
-﻿using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
+﻿
 using portal_por_elas.Contracts.Request;
 using portal_por_elas.Contracts.Response;
 using portal_por_elas.Exceptions;
 using portal_por_elas.Interfaces;
 using portal_por_elas.Interfaces.Services;
-using portal_por_elas.Security;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Text;
 
 namespace portal_por_elas.Services
 {
-    public class AuthService : IAuthService
+    namespace portal_por_elas.Services
     {
-        private readonly IUnitOfWork _uow;
-        private readonly JwtSettings _jwtSettings;
-
-        public AuthService(IUnitOfWork uow, IOptions<JwtSettings> jwtSettings)
+        public class AuthService : IAuthService
         {
-            _uow = uow;
-            _jwtSettings = jwtSettings.Value;
-        }
+            private readonly IUnitOfWork _uow;
+            private readonly ITokenService _tokenService;
 
-        public async Task<LoginResponseDto> LoginAsync(LoginRequestDto dto)
-        {
-            var user = await _uow.Users.GetByEmailAsync(dto.Email);
-
-            if (user is null)
-                throw new UnauthorizedException("Usuário ou senha inválidos.");
-
-            if (!BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash))
-                throw new UnauthorizedException("Usuário ou senha inválidos.");
-
-            if (user is null || !user.Active)
-                throw new UnauthorizedException("Usuário ou senha inválidos.");
-
-            if (user.IsTemporaryPasswordExpired())
-                throw new UnauthorizedException("Sua senha temporária expirou. Solicite uma nova senha.");
-
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.UTF8.GetBytes(_jwtSettings.SecretKey);
-
-            var claims = new List<Claim>
-        {
-            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            new Claim(ClaimTypes.Email, user.Email),
-            new Claim(ClaimTypes.Role, user.Role),
-            new Claim("name", user.Name)
-        };
-
-            var tokenDescriptor = new SecurityTokenDescriptor
+            public AuthService(IUnitOfWork uow, ITokenService tokenService)
             {
-                Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.UtcNow.AddMinutes(_jwtSettings.ExpirationMinutes),
-                SigningCredentials = new SigningCredentials(
-                    new SymmetricSecurityKey(key),
-                    SecurityAlgorithms.HmacSha256Signature
-                ),
-                Issuer = _jwtSettings.Issuer,
-                Audience = _jwtSettings.Audience
-            };
+                _uow = uow;
+                _tokenService = tokenService;
+            }
 
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-
-            return new LoginResponseDto
+            public async Task<LoginResponseDto> LoginAsync(LoginRequestDto dto)
             {
-                Token = tokenHandler.WriteToken(token),
-                Expiration = tokenDescriptor.Expires.Value
-            };
+                var user = await _uow.Users.GetByEmailAsync(dto.Email.Trim().ToLowerInvariant());
+
+                if (user is null || !user.Active)
+                    throw new UnauthorizedException("Usuário ou senha inválidos.");
+
+                if (user.IsTemporaryPasswordExpired())
+                    throw new UnauthorizedException("Sua senha temporária expirou. Solicite uma nova senha.");
+
+                if (!BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash))
+                    throw new UnauthorizedException("Usuário ou senha inválidos.");
+
+                var (accessToken, expiraEm) = _tokenService.GenerateToken(user);
+                var refreshToken = _tokenService.GenerateRefreshToken();
+
+                user.DefinirRefreshToken(refreshToken, DateTime.UtcNow.AddDays(7));
+                await _uow.Users.UpdateAsync(user);
+                await _uow.CommitAsync();
+
+                return new LoginResponseDto
+                {
+                    AccessToken = accessToken,
+                    RefreshToken = refreshToken,
+                    AccessTokenExpiraEm = expiraEm,
+                    Name = user.Name,
+                    Email = user.Email,
+                    Role = user.Role
+                };
+            }
+
+            public async Task<LoginResponseDto> RefreshTokenAsync(RefreshTokenRequestDto dto)
+            {
+                var principal = _tokenService.GetPrincipalFromExpiredToken(dto.AccessToken);
+                var userIdClaim = principal.FindFirst(JwtRegisteredClaimNames.Sub)?.Value
+                    ?? principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+                if (!Guid.TryParse(userIdClaim, out var userId))
+                    throw new UnauthorizedException("Token inválido.");
+
+                var user = await _uow.Users.GetByIdAsync(userId);
+
+                if (user is null || !user.Active || !user.RefreshTokenValido(dto.RefreshToken))
+                    throw new UnauthorizedException("Refresh token inválido ou expirado. Faça login novamente.");
+
+                // Rotação de tokens: gera um novo par e invalida o anterior
+                var (novoAccessToken, expiraEm) = _tokenService.GenerateToken(user);
+                var novoRefreshToken = _tokenService.GenerateRefreshToken();
+
+                user.DefinirRefreshToken(novoRefreshToken, DateTime.UtcNow.AddDays(7));
+                await _uow.Users.UpdateAsync(user);
+                await _uow.CommitAsync();
+
+                return new LoginResponseDto
+                {
+                    AccessToken = novoAccessToken,
+                    RefreshToken = novoRefreshToken,
+                    AccessTokenExpiraEm = expiraEm,
+                    Name = user.Name,
+                    Email = user.Email,
+                    Role = user.Role
+                };
+            }
+
+            public async Task RevokeAsync(Guid userId)
+            {
+                var user = await _uow.Users.GetByIdAsync(userId)
+                    ?? throw new NotFoundException("Usuário não encontrado.");
+
+                user.RevogarRefreshToken();
+                await _uow.Users.UpdateAsync(user);
+                await _uow.CommitAsync();
+            }
         }
     }
-
 }

@@ -24,6 +24,29 @@
         public DateTime CreatedAt { get; private set; }
         public DateTime? TemporaryPasswordExpiryTime { get; private set; }
 
+        public string? RefreshToken { get; private set; }
+        public DateTime? RefreshTokenExpiryTime { get; private set; }
+
+        public void DefinirRefreshToken(string refreshToken, DateTime expiraEm)
+        {
+            RefreshToken = refreshToken;
+            RefreshTokenExpiryTime = expiraEm;
+        }
+
+        public void RevogarRefreshToken()
+        {
+            RefreshToken = null;
+            RefreshTokenExpiryTime = null;
+        }
+
+        public bool RefreshTokenValido(string refreshToken)
+        {
+            return !string.IsNullOrWhiteSpace(RefreshToken)
+                && RefreshToken == refreshToken
+                && RefreshTokenExpiryTime.HasValue
+                && RefreshTokenExpiryTime.Value > DateTime.UtcNow;
+        }
+
         public void SetTemporaryPassword(string temporaryPasswordHash, DateTime expiryTime)
         {
             SetPassword(temporaryPasswordHash);
@@ -74,6 +97,7 @@
         {
             SetPassword(newPasswordHash);
             TemporaryPasswordExpiryTime = null;
+            RevogarRefreshToken();
         }
         public bool IsTemporaryPasswordExpired()
         {

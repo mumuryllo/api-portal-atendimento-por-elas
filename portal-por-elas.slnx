@@ -1,3 +1,5 @@
 <Solution>
+  <Project Path="portal-por-elas.Gateway/portal-por-elas.Gateway.csproj" />
+  <Project Path="portal-por-elas.Tests/portal-por-elas.Tests.csproj" />
   <Project Path="portal-por-elas/portal-por-elas.csproj" />
 </Solution>

@@ -22,6 +22,157 @@ namespace portal_por_elas.Data.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("portal_por_elas.Domain.Entities.Evento", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<bool>("Ativo")
+                        .HasColumnType("boolean")
+                        .HasColumnName("ativo");
+
+                    b.Property<DateTime>("CriadoEm")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("criado_em");
+
+                    b.Property<DateOnly>("DataEvento")
+                        .HasColumnType("date")
+                        .HasColumnName("data_evento");
+
+                    b.Property<TimeOnly>("HoraFim")
+                        .HasColumnType("time without time zone")
+                        .HasColumnName("hora_fim");
+
+                    b.Property<TimeOnly>("HoraInicio")
+                        .HasColumnType("time without time zone")
+                        .HasColumnName("hora_inicio");
+
+                    b.Property<string>("Nome")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)")
+                        .HasColumnName("nome");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("eventos", (string)null);
+                });
+
+            modelBuilder.Entity("portal_por_elas.Domain.Entities.FilaAtendimento", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime?>("ChamadoEm")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("chamado_em");
+
+                    b.Property<DateTime>("CriadoEm")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("criado_em");
+
+                    b.Property<Guid>("EventoId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("evento_id");
+
+                    b.Property<DateTime?>("FinalizadoEm")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("finalizado_em");
+
+                    b.Property<string>("NomeMulher")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)")
+                        .HasColumnName("nome_mulher");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("status");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EventoId");
+
+                    b.ToTable("fila_atendimentos", (string)null);
+                });
+
+            modelBuilder.Entity("portal_por_elas.Domain.Entities.FilaAtendimentoServico", b =>
+                {
+                    b.Property<Guid>("FilaAtendimentoId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("fila_atendimento_id");
+
+                    b.Property<Guid>("ServicoId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("servico_id");
+
+                    b.HasKey("FilaAtendimentoId", "ServicoId");
+
+                    b.HasIndex("ServicoId");
+
+                    b.ToTable("fila_atendimento_servicos", (string)null);
+                });
+
+            modelBuilder.Entity("portal_por_elas.Domain.Entities.Servico", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<bool>("Ativo")
+                        .HasColumnType("boolean")
+                        .HasColumnName("ativo");
+
+                    b.Property<string>("Nome")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("nome");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("servicos", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("11111111-1111-1111-1111-111111111101"),
+                            Ativo = true,
+                            Nome = "Manicure e Pedicure"
+                        },
+                        new
+                        {
+                            Id = new Guid("11111111-1111-1111-1111-111111111102"),
+                            Ativo = true,
+                            Nome = "Corte e Escova"
+                        },
+                        new
+                        {
+                            Id = new Guid("11111111-1111-1111-1111-111111111103"),
+                            Ativo = true,
+                            Nome = "Coloração e Hidratação"
+                        },
+                        new
+                        {
+                            Id = new Guid("11111111-1111-1111-1111-111111111104"),
+                            Ativo = true,
+                            Nome = "Limpeza de Pele"
+                        },
+                        new
+                        {
+                            Id = new Guid("11111111-1111-1111-1111-111111111105"),
+                            Ativo = true,
+                            Nome = "Design de Sobrancelhas"
+                        });
+                });
+
             modelBuilder.Entity("portal_por_elas.Domain.Entities.User", b =>
                 {
                     b.Property<Guid>("Id")
@@ -70,6 +221,51 @@ namespace portal_por_elas.Data.Migrations
                         .IsUnique();
 
                     b.ToTable("users", (string)null);
+                });
+
+            modelBuilder.Entity("portal_por_elas.Domain.Entities.FilaAtendimento", b =>
+                {
+                    b.HasOne("portal_por_elas.Domain.Entities.Evento", "Evento")
+                        .WithMany("Atendimentos")
+                        .HasForeignKey("EventoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Evento");
+                });
+
+            modelBuilder.Entity("portal_por_elas.Domain.Entities.FilaAtendimentoServico", b =>
+                {
+                    b.HasOne("portal_por_elas.Domain.Entities.FilaAtendimento", "FilaAtendimento")
+                        .WithMany("Servicos")
+                        .HasForeignKey("FilaAtendimentoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("portal_por_elas.Domain.Entities.Servico", "Servico")
+                        .WithMany("AtendimentoServicos")
+                        .HasForeignKey("ServicoId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("FilaAtendimento");
+
+                    b.Navigation("Servico");
+                });
+
+            modelBuilder.Entity("portal_por_elas.Domain.Entities.Evento", b =>
+                {
+                    b.Navigation("Atendimentos");
+                });
+
+            modelBuilder.Entity("portal_por_elas.Domain.Entities.FilaAtendimento", b =>
+                {
+                    b.Navigation("Servicos");
+                });
+
+            modelBuilder.Entity("portal_por_elas.Domain.Entities.Servico", b =>
+                {
+                    b.Navigation("AtendimentoServicos");
                 });
 #pragma warning restore 612, 618
         }

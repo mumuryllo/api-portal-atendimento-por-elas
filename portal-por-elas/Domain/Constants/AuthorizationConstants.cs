@@ -3,6 +3,6 @@
     public static class AuthorizationConstants
     {
         public const string Admin = "ADMIN";
-        public const string Cliente = "CLIENTE";
+        public const string Mulheres = "Mulheres";
     }
 }

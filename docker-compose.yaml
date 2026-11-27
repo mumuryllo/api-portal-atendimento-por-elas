@@ -1,0 +1,103 @@
+services:
+  postgres-dev:
+    image: postgres:16-alpine
+    container_name: porelas-postgres-dev
+    restart: unless-stopped
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_DB: portal_por_elas_dev
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U root -d portal_por_elas_dev"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - porelas-net
+
+  postgres-prod:
+    image: postgres:16-alpine
+    container_name: porelas-postgres-prod
+    restart: unless-stopped
+    ports:
+      - "5434:5432"
+    environment:
+      POSTGRES_DB: portal_por_elas_prod
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+    volumes:
+      - postgres_prod_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U root -d portal_por_elas_prod"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - porelas-net
+
+  api-dev:
+    build:
+      context: .
+      dockerfile: portal-por-elas/Dockerfile
+    container_name: porelas-api-dev
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+      ENABLE_SWAGGER: "true"
+      ConnectionStrings__DefaultConnection: Host=postgres-dev;Port=5432;Database=portal_por_elas_dev;Username=root;Password=root
+      JwtSettings__SecretKey: ChaveSecretaSuperSeguraDevPortalPorElas2026!
+      ApiSettings__BaseUrl: https://portal-por-elas/dev
+    depends_on:
+      postgres-dev:
+        condition: service_healthy
+    networks:
+      - porelas-net
+
+  api-prod:
+    build:
+      context: .
+      dockerfile: portal-por-elas/Dockerfile
+    container_name: porelas-api-prod
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:8080
+      ENABLE_SWAGGER: "true"
+      ConnectionStrings__DefaultConnection: Host=postgres-prod;Port=5432;Database=portal_por_elas_prod;Username=root;Password=root
+      JwtSettings__SecretKey: ChaveSecretaSuperSeguraProdPortalPorElas2026!
+      ApiSettings__BaseUrl: https://portal-por-elas/prod
+    depends_on:
+      postgres-prod:
+        condition: service_healthy
+    networks:
+      - porelas-net
+
+  gateway:
+    build:
+      context: .
+      dockerfile: portal-por-elas.Gateway/Dockerfile
+    container_name: porelas-gateway
+    restart: unless-stopped
+    ports:
+      - "5000:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:8080
+    depends_on:
+      - api-dev
+      - api-prod
+    networks:
+      - porelas-net
+
+volumes:
+  postgres_dev_data:
+  postgres_prod_data:
+
+networks:
+  porelas-net:
+    driver: bridge

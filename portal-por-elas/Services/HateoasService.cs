@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Controllers;
-using portal_por_elas.Contracts.Response;
 using portal_por_elas.Contracts.Response.Hateoas;
 using portal_por_elas.Interfaces.Services;
 using System.Security.Claims;
@@ -14,16 +13,19 @@ namespace portal_por_elas.Services
         private readonly string _baseUrl;
 
         public HateoasService(
-       EndpointDataSource endpointDataSource,
-       IWebHostEnvironment environment,
-       IConfiguration configuration)
+            EndpointDataSource endpointDataSource,
+            IWebHostEnvironment environment,
+            IConfiguration configuration)
         {
             _endpointDataSource = endpointDataSource;
             _environment = environment;
-            _baseUrl = configuration["ApiSettings:BaseUrl"]?.TrimEnd('/')
-                ?? (_environment.IsDevelopment()
-                    ? "https://portal-por-elas/dev"
-                    : "https://portal-por-elas/prod");
+
+            var configuredBaseUrl = configuration["ApiSettings:BaseUrl"];
+            _baseUrl = !string.IsNullOrWhiteSpace(configuredBaseUrl)
+                ? configuredBaseUrl.TrimEnd('/')
+                : (_environment.IsDevelopment()
+                    ? "http://localhost:5000/portal-por-elas/dev"
+                    : "http://localhost:5000/portal-por-elas/prod");
         }
 
         public HateoasResponseDto DiscoverLinks(

@@ -27,7 +27,7 @@ namespace portal_por_elas.Extensions
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<IAuthService, AuthService>(); 
             services.AddScoped<IUserService, UserService>();
-
+            services.AddScoped<IHateoasService, HateoasService>();
             //Email
             services.AddScoped<IEmailService, EmailService>();
 
